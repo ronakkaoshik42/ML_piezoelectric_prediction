@@ -8,10 +8,11 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Normalize;
+import java.io.Serializable;
 
 /* A wrapper class to use Weka's classifiers */
 
-public class MLClassifier {
+public class MLClassifier implements Serializable{
 	FeatureCalc featureCalc = null;
     SMO classifier = null;
     Attribute classattr;
