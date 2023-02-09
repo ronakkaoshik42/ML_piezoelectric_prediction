@@ -1,3 +1,4 @@
+import java.awt.Toolkit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -51,7 +52,13 @@ public class ClassifyVibration extends PApplet {
 	}
 	
 	public void settings() {
-		size(512, 400);
+		//size(512, 400);
+		
+		// For Fullscreen
+		Toolkit tk = Toolkit.getDefaultToolkit();
+	 	int xSize = ((int) tk.getScreenSize().getWidth());
+	 	int ySize = ((int) tk.getScreenSize().getHeight());
+	 	setSize(xSize,ySize);
 	}
 
 	public void setup() {
@@ -150,7 +157,7 @@ public class ClassifyVibration extends PApplet {
 			else if(spacePress == 'O') {
 				spacePress = 'E';
 			}
-			println("SpaceBar" + spacePress);
+			//println("SpaceBar" + spacePress);
 		}
 		
 		else if (key == CODED && keyCode == DOWN) {
