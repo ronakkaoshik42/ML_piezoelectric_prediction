@@ -20,15 +20,17 @@ public class ClassifyVibration extends PApplet {
 	int nsamples = 1024;
 	float[] spectrum = new float[bands];
 	float[] fftFeatures = new float[bands];
-	String[] classNames = {"quiet", "circle", "square"};
+	String[] classNames = {"quiet", "whistle", "shhhhh"};
 	int classIndex = 0;
 	int dataCount = 0;
 	
 	/* Track History of predictions and stabilizes result*/
-	int historyLength = 50;
 	int currentIndex = 0;
-	String[] history = new String[historyLength];
+	char spacePress = 'E';	// E - Even, O - Odd
+	String lastResult = "";
+	ArrayList<String> history = new ArrayList<>();
 
+	
 	MLClassifier classifier;
 	SaveCustomObjectInFile save_load_file = new SaveCustomObjectInFile();
 	
@@ -107,30 +109,28 @@ public class ClassifyVibration extends PApplet {
 		textSize(30);
 		
 		if(classifier != null) {
-			String guessedLabel = classifier.classify(captureInstance(null));
-			String printLabel = "";
-			// Yang: add code to stabilize your classification results
-			if(currentIndex >= historyLength)
-			{
-				for(int i=historyLength-1;i>=1;i--)
-				{
-					history[i] = history[i-1];
-				}
-				history[0] = guessedLabel;
-				printLabel = mostFrequent(history, historyLength);
-				//println("History");
-			}
-			else
-			{
-				printLabel = guessedLabel;
-				history[currentIndex] = guessedLabel;
-				//println("No History");
-			}
-			//println(currentIndex);
-			currentIndex++;
-
 			
-			text("classified as: " + printLabel, 20, 30);
+			// Start recording
+			if(spacePress == 'O') {
+				String guessedLabel = classifier.classify(captureInstance(null));
+				// Yang: add code to stabilize your classification results
+				history.add(guessedLabel);
+
+				String printLabel = mostFrequent(history);
+				lastResult = printLabel;
+				println("current: "+history.size());
+				//text("classified as (current window): " + printLabel, 20, 30);
+				text("Recording... "+history.size()+" samples", 20, 30);
+				text("Press Space to Stop", 20, 60);
+			}
+			
+			// Stop recording
+			else if(spacePress == 'E') {
+				println("current: "+history.size());
+				text("classified as (final window): " + lastResult, 20, 30);
+				text("Press Space to Start", 20, 60);
+				history.clear();
+			}
 		}else {
 			text(classNames[classIndex], 20, 30);
 			dataCount = trainingData.get(classNames[classIndex]).size();
@@ -142,7 +142,18 @@ public class ClassifyVibration extends PApplet {
 	public void keyPressed() {
 		
 
-		if (key == CODED && keyCode == DOWN) {
+		// For checking Spacebar
+		if(key == ' ') {
+			if(spacePress == 'E') {
+				spacePress = 'O';
+			}
+			else if(spacePress == 'O') {
+				spacePress = 'E';
+			}
+			println("SpaceBar" + spacePress);
+		}
+		
+		else if (key == CODED && keyCode == DOWN) {
 			classIndex = (classIndex + 1) % classNames.length;
 		}
 		
@@ -172,25 +183,25 @@ public class ClassifyVibration extends PApplet {
 			trainingData.get(classNames[classIndex]).add(captureInstance(classNames[classIndex]));
 		}
 	}
-	public static String mostFrequent(String[] arr, int n)
+	
+	public static String mostFrequent(ArrayList<String> arr)
 	  {
+		int n = arr.size();
 	    int maxcount = 0;
 	    String element_having_max_freq = "";
 	    for (int i = 0; i < n; i++) {
 	      int count = 0;
 	      for (int j = 0; j < n; j++) {
-	        if (arr[i]!=null && arr[i]!=null && arr[i].equals(arr[j])) {
+	        if (arr.get(i)!=null && arr.get(j)!=null && arr.get(i).equals(arr.get(j))) {
 	          count++;
 	        }
 	      }
 	  
 	      if (count > maxcount) {
 	        maxcount = count;
-	        element_having_max_freq = arr[i];
+	        element_having_max_freq = arr.get(i);
 	      }
 	    }
-	  
 	    return element_having_max_freq;
 	  }
-
 }
