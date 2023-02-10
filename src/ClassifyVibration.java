@@ -21,7 +21,7 @@ public class ClassifyVibration extends PApplet {
 	int nsamples = 1024;
 	float[] spectrum = new float[bands];
 	float[] fftFeatures = new float[bands];
-	String[] classNames = {"quiet", "whistle", "shhhhh"};
+	String[] classNames = {"quiet", "pencil", "brush"};
 	int classIndex = 0;
 	int dataCount = 0;
 	
@@ -30,6 +30,7 @@ public class ClassifyVibration extends PApplet {
 	char spacePress = 'E';	// E - Even, O - Odd
 	String lastResult = "";
 	ArrayList<String> history = new ArrayList<>();
+	String percentage = "";
 
 	
 	MLClassifier classifier;
@@ -68,7 +69,7 @@ public class ClassifyVibration extends PApplet {
 		Sound s = new Sound(this);
 		  
 		/* select microphone device */
-		s.inputDevice(3);
+		s.inputDevice(6);
 		    
 		/* create an Input stream which is routed into the FFT analyzer */
 		fft = new FFT(this, bands);
@@ -125,17 +126,42 @@ public class ClassifyVibration extends PApplet {
 
 				String printLabel = mostFrequent(history);
 				lastResult = printLabel;
-				println("current: "+history.size());
+				//println("current: "+history.size());
 				//text("classified as (current window): " + printLabel, 20, 30);
 				text("Recording... "+history.size()+" samples", 20, 30);
 				text("Press Space to Stop", 20, 60);
+				
+				double per_quiet=0, per_keys=0, per_knock=0;
+				for(int j=0;j<history.size();j++)
+				{
+					if(history.get(j).equals(classNames[0]))
+					{
+						per_quiet+=1;
+					}
+					else if(history.get(j).equals(classNames[1]))
+					{
+						per_keys+=1;
+					}
+					else if(history.get(j).equals(classNames[2]))
+					{
+						per_knock+=1;
+					}
+				}
+				
+				percentage = classNames[0]+": "+ String.format("%.3f", (per_quiet/history.size()));
+				percentage += " ,"+classNames[1]+": "+ String.format("%.3f", (per_keys/history.size()));
+				percentage += " ,"+classNames[2]+": "+ String.format("%.3f", (per_knock/history.size()));
 			}
 			
 			// Stop recording
 			else if(spacePress == 'E') {
-				println("current: "+history.size());
+				//println("current: "+history.size());
 				text("classified as (final window): " + lastResult, 20, 30);
 				text("Press Space to Start", 20, 60);
+				
+				text(percentage, 20, 90);
+				
+				
 				history.clear();
 			}
 		}else {

@@ -3,7 +3,7 @@ import java.io.*;
 
 public class SaveCustomObjectInFile implements Serializable {
 	
-	final static String modelPath = "D:/GitHub/ML_piezoelectric_prediction/models/model.save";
+	final static String modelPath = "/Users/ronakkaoshik/Documents/GitHub/ML_piezoelectric_prediction/models/model.save";
 	
 	
 	private static final long serialVersionUID = -1L;
