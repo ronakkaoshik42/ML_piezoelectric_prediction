@@ -59,7 +59,7 @@ public class ClassifyVibration extends PApplet {
 		Toolkit tk = Toolkit.getDefaultToolkit();
 	 	int xSize = ((int) tk.getScreenSize().getWidth());
 	 	int ySize = ((int) tk.getScreenSize().getHeight());
-	 	setSize(xSize,ySize);
+	 	setSize(xSize-50,ySize-200);
 	}
 
 	public void setup() {
@@ -69,7 +69,7 @@ public class ClassifyVibration extends PApplet {
 		Sound s = new Sound(this);
 		  
 		/* select microphone device */
-		s.inputDevice(6);
+		s.inputDevice(5);
 		    
 		/* create an Input stream which is routed into the FFT analyzer */
 		fft = new FFT(this, bands);
@@ -130,6 +130,7 @@ public class ClassifyVibration extends PApplet {
 				//text("classified as (current window): " + printLabel, 20, 30);
 				text("Recording... "+history.size()+" samples", 20, 30);
 				text("Press Space to Stop", 20, 60);
+				text("Current Prediction: "+lastResult, 20, 90);
 				
 				double per_quiet=0, per_keys=0, per_knock=0;
 				for(int j=0;j<history.size();j++)
