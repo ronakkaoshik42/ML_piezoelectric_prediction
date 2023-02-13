@@ -1,4 +1,5 @@
 import java.awt.Toolkit;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -9,6 +10,10 @@ import processing.sound.AudioIn;
 import processing.sound.FFT;
 import processing.sound.Sound;
 import processing.sound.Waveform;
+
+import java.awt.Desktop;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 /* A class with the main function and Processing visualizations to run the demo */
 
@@ -31,7 +36,9 @@ public class ClassifyVibration extends PApplet {
 	String lastResult = "";
 	ArrayList<String> history = new ArrayList<>();
 	String percentage = "";
-
+	
+	boolean redirect_video = false;
+	int count_video = 0;
 	
 	MLClassifier classifier;
 	SaveCustomObjectInFile save_load_file = new SaveCustomObjectInFile();
@@ -132,7 +139,7 @@ public class ClassifyVibration extends PApplet {
 				text("Press Space to Stop", 20, 60);
 				text("Current Prediction: "+lastResult, 20, 90);
 				
-				double per_quiet=0, per_keys=0, per_knock=0;
+				double per_quiet=0, per_pencil=0, per_brush=0;
 				for(int j=0;j<history.size();j++)
 				{
 					if(history.get(j).equals(classNames[0]))
@@ -141,17 +148,27 @@ public class ClassifyVibration extends PApplet {
 					}
 					else if(history.get(j).equals(classNames[1]))
 					{
-						per_keys+=1;
+						per_pencil+=1;
 					}
 					else if(history.get(j).equals(classNames[2]))
 					{
-						per_knock+=1;
+						per_brush+=1;
 					}
 				}
 				
+				// if pencil is very small, and brush is not very small -> ans = brush
+				if((per_pencil/history.size()) < 0.1 && (per_brush/history.size()) >= 0.1)
+				{
+					lastResult = classNames[2];
+				}
+				
+				
 				percentage = classNames[0]+": "+ String.format("%.3f", (per_quiet/history.size()));
-				percentage += " ,"+classNames[1]+": "+ String.format("%.3f", (per_keys/history.size()));
-				percentage += " ,"+classNames[2]+": "+ String.format("%.3f", (per_knock/history.size()));
+				percentage += " ,"+classNames[1]+": "+ String.format("%.3f", (per_pencil/history.size()));
+				percentage += " ,"+classNames[2]+": "+ String.format("%.3f", (per_brush/history.size()));
+				
+				//Make counter 0
+				count_video = 0;
 			}
 			
 			// Stop recording
@@ -159,8 +176,37 @@ public class ClassifyVibration extends PApplet {
 				//println("current: "+history.size());
 				text("classified as (final window): " + lastResult, 20, 30);
 				text("Press Space to Start", 20, 60);
-				
 				text(percentage, 20, 90);
+				
+				
+				if(redirect_video && count_video == 0)
+				{
+					String url = "";
+					// Pencil
+					if(lastResult.equals(classNames[1]))
+					{
+						url = "https://www.youtube.com/live/jfKfPfyJRdk?";
+					}
+					// Brush
+					else if(lastResult.equals(classNames[2]))
+					{
+						url = "https://youtu.be/RU-EBPP-lcg";
+					}
+					
+					if (!url.equals("") && Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+					    try {
+							Desktop.getDesktop().browse(new URI(url));
+							count_video++;
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} catch (URISyntaxException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+				}
+
 				
 				
 				history.clear();
